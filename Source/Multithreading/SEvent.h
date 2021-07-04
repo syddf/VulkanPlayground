@@ -1,6 +1,8 @@
 #pragma once
 #include "Common.h"
 #include <Windows.h>
+#include <mutex>
+#include <queue>
 
 class SEvent
 {
@@ -75,11 +77,18 @@ public:
 		return InnerEvent->IsManualReset();
 	}
 
-private:
+public:
 	SEvent* InnerEvent;
 };
 
+template<bool bManualReset>
 class SWindowsEventPool
 {
+public:
+	SRecyclableWindowsEvent* GetEventFromPool();
+	void ReturnEventToPool(SEvent* Event);
 
+private:
+	std::mutex QueueMutex;
+	std::queue<SEvent*> EventQueue;
 };
